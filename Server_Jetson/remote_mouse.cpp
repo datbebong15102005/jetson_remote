@@ -89,6 +89,7 @@ void cleanup_and_exit(int signum) {
     system("if [ -f /tmp/wsr_remote_gst.pid ]; then kill -15 $(cat /tmp/wsr_remote_gst.pid) 2>/dev/null; rm /tmp/wsr_remote_gst.pid; fi");
     
     std::cout << "[+] Shutting down...\n";
+    system("pkill -f 'tegrastats'"); // Dừng luôn cả script giám sát tegrastats
     exit(0);
 }
 
