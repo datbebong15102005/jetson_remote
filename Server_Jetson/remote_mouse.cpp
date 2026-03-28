@@ -11,6 +11,7 @@
 #include <mutex>
 #include <csignal>
 #include <arpa/inet.h>
+#include <httplib.h>
 
 // Định nghĩa gói tin siêu nhẹ (16 bytes)
 struct MouseAndKeyboardPacket {
@@ -164,6 +165,42 @@ void monitor_resolution() {
     }
 }
 
+// Web Server để hiển thị Dashboard trạng thái 
+void start_web_server() {
+    httplib::Server svr;
+
+    // Khung HTML đơn giản để hiển thị trạng thái của hệ thống, có thể tùy chỉnh thêm sau
+    const char* html_content = R"(
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Remote Dashboard</title>
+        <style>
+            body { background-color: #1e1e1e; color: #00ff00; font-family: monospace; text-align: center; margin-top: 50px; }
+            .box { border: 2px solid #00ff00; padding: 20px; display: inline-block; border-radius: 10px; box-shadow: 0 0 15px #00ff00; }
+        </style>
+    </head>
+    <body>
+        <div class="box">
+            <h2>🚀 Jetson Remote V2.0 (Beta)</h2>
+            <p>Status: <span style="color: yellow;">RUNNING</span></p>
+            <p>Web UI is active on port 8080!</p>
+            </div>
+    </body>
+    </html>
+    )";
+
+    // Tạo Router: Bất cứ ai truy cập vào IP của Jetson cổng 8080 đều sẽ thấy trang này
+    svr.Get("/", [html_content](const httplib::Request &, httplib::Response &res) {
+        res.set_content(html_content, "text/html");
+    });
+
+    std::cout << "\n[+] Web UI Dashboard đang chạy tại cổng 8080...\n";
+    
+    // Lắng nghe trên mọi IP mạng LAN (0.0.0.0)
+    svr.listen("0.0.0.0", 8080);
+}
+
 int main(int argc, char *argv[]) {
     // Đăng ký bắt sự kiện Ctrl+C (SIGINT) để dọn dẹp trước khi chết
     signal(SIGINT, cleanup_and_exit);
@@ -196,6 +233,10 @@ int main(int argc, char *argv[]) {
     std::cout << "        Bắn tới IP:   " << target_ip << "\n";
     std::cout << "        Bitrate:      " << target_bitrate << " bps\n";
 
+    // Kích hoạt Web Server chạy ở một luồng riêng biệt
+    std::thread web_thread(start_web_server);
+    web_thread.detach();
+    
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;

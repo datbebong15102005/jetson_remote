@@ -1,0 +1,11 @@
+# Bỏ qua thư mục build của Qt
+build-*/
+*.pro.user
+
+# Bỏ qua các file object và thực thi sinh ra lúc biên dịch
+*.o
+*.out
+wsr_mouse
+
+# Bỏ qua file log rác
+*.log
