@@ -36,15 +36,15 @@ sudo apt install gstreamer1.0-tools gstreamer1.0-plugins-bad gstreamer1.0-plugin
 ### Build & Run
 ```bash
 cd Server_Jetson
-g++ -O3 remote_mouse.cpp -o wsr_remote_server -lpthread
-sudo ./wsr_remote_server :0
+g++ -O3 remote_mouse.cpp -o remote_server -lpthread
+sudo ./remote_server :0
 ```
 
 *(Note: sudo is required because the server needs permission to access /dev/uinput for hardware-level mouse/keyboard simulation).*
 
 ---
 
-## 💻 2. Client UI Setup (The "Viewer")
+## 💻 2. Client UI Setup
 
 ### Prerequisites
 You need a standard Linux distribution with Qt5 development packages installed.
