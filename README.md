@@ -52,6 +52,8 @@ You need a standard Linux distribution with Qt5 development packages installed.
 sudo apt update
 sudo apt install build-essential qtcreator qtbase5-dev qtdeclarative5-dev qml-module-qtquick-controls2 qml-module-qtquick-window2 qml-module-qtmultimedia libqt5multimedia5-plugins qtmultimedia5-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-qt5 libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev qttools5-dev qttools5-dev-tools
 
+sudo apt install cmake ninja-build build-essential 
+
 ```
 
 ### Build & Run
