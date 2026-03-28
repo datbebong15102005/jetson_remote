@@ -28,17 +28,17 @@ This repository contains two main components:
 ### Prerequisites
 Your Jetson must be running NVIDIA L4T (Linux for Tegra) with X11 display server.
 
+```bash
 sudo apt update
-
 sudo apt install gstreamer1.0-tools gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libx11-dev
+```
 
 ### Build & Run
-
+```bash
 cd Server_Jetson
-
 g++ -O3 remote_mouse.cpp -o wsr_remote_server -lpthread
-
 sudo ./wsr_remote_server :0
+```
 
 *(Note: sudo is required because the server needs permission to access /dev/uinput for hardware-level mouse/keyboard simulation).*
 
@@ -47,7 +47,11 @@ sudo ./wsr_remote_server :0
 ## 💻 2. Client UI Setup (The "Viewer")
 
 ### Prerequisites
-Any standard Linux distribution with Qt5 or Qt6 installed.
+You need a standard Linux distribution with Qt5 development packages installed.
+```bash
+sudo apt update
+sudo apt install build-essential qtcreator qtbase5-dev qtdeclarative5-dev qml-module-qtquick-controls2 qml-module-qtquick-window2
+```
 
 ### Build & Run
 1. Open the project in **Qt Creator**.
