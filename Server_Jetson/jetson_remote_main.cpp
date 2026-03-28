@@ -1,4 +1,4 @@
-#include "jetson_remote.hpp"
+#include "include/jetson_remote.hpp"
 
 int main(int argc, char *argv[]) {
     // Đăng ký bắt sự kiện Ctrl+C (SIGINT) để dọn dẹp trước khi chết
