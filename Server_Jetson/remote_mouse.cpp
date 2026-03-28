@@ -12,6 +12,9 @@
 #include <csignal>
 #include <arpa/inet.h>
 #include "httplib.h"
+#include <fstream> // Need to get output of tegrastats
+#include <cstdio> // Need for p.open and popen
+#include <memory> // Need for shared_ptr to popen and pclose
 
 // Định nghĩa gói tin siêu nhẹ (16 bytes)
 struct MouseAndKeyboardPacket {
@@ -165,6 +168,28 @@ void monitor_resolution() {
     }
 }
 
+// Hàm lấy chuỗi trạng thái từ tegrastats để hiển thị trên Dashboard Web
+std::string get_tegrastats_string() {
+    char buffer[512]; // buffer tạm để đọc output của tegrastats
+    std::string result = "";
+    
+    // Gọi lệnh Linux (--oneshot để nó trả về 1 dòng rồi tắt luôn)
+    // pclose_wrapper là để tự động pclose file stream khi shared_ptr bị hủy
+    FILE* pipe = popen("tegrastats --oneshot", "r");
+    if (!pipe) return "Error: Cannot run tegrastats";
+    
+    // Đọc cái chuỗi đầu ra
+    while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
+        result += buffer;
+    }
+    pclose(pipe); // Đóng luồng
+    
+    // Nếu rỗng, báo lỗi
+    if (result.empty()) return "Error: tegrastats returned empty";
+    
+    return result; // Chuỗi tegrastats
+}
+
 // Web Server để hiển thị Dashboard trạng thái 
 void start_web_server() {
     httplib::Server svr;
@@ -191,8 +216,58 @@ void start_web_server() {
     )";
 
     // Tạo Router: Bất cứ ai truy cập vào IP của Jetson cổng 8080 đều sẽ thấy trang này
-    svr.Get("/", [html_content](const httplib::Request &, httplib::Response &res) {
-        res.set_content(html_content, "text/html");
+    // Router: Bắn HTML mới mỗi lần ai đó F5
+    svr.Get("/", [](const httplib::Request &, httplib::Response &res) {
+        
+        // 1. Lấy chuỗi tegrastats tươi sống
+        std::string raw_stats = get_tegrastats_string();
+        
+        // 2. Dựng chuỗi HTML màu sắc Cyberpunk (Thêm script reload mỗi 2 giây)
+        std::string dynamic_html = R"(
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Jetson Remote Dashboard</title>
+            <style>
+                body { background-color: #1e1e1e; color: #00ff00; font-family: monospace; text-align: center; margin-top: 30px; }
+                .main-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+                .box { border: 2px solid #00ff00; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px #00ff00; min-width: 400px;}
+                #stats-box { border: 2px solid #ff00ff; box-shadow: 0 0 15px #ff00ff; color: #ff00ff;} /* Hộp thông số màu tím */
+                .stats-text { font-size: 14px; white-space: pre-wrap; word-wrap: break-word; text-align: left; }
+                
+                .fire { color: red; font-weight: bold; } 
+            </style>
+            
+            <script>
+                setTimeout(function(){
+                   location.reload();
+                }, 2000); 
+            </script>
+        </head>
+        <body>
+            <div class="main-container">
+                
+                <div class="box">
+                    <h2><span class="fire">🚀</span> Jetson Remote V2.0 (Beta)</h2>
+                    <p>Status: <span style="color: yellow;">RUNNING</span></p>
+                </div>
+                
+                <div class="box" id="stats-box">
+                    <h3>📊 System Metrics (tegrastats)</h3>
+                    <div class="stats-text">)";
+        
+        dynamic_html += raw_stats;
+        
+        // Đóng HTML
+        dynamic_html += R"(
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        )";
+
+        res.set_content(dynamic_html, "text/html");
     });
 
     std::cout << "\n[+] Web UI Dashboard đang chạy tại cổng 8080...\n";
