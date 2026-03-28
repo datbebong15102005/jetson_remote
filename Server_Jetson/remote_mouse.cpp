@@ -168,25 +168,16 @@ void monitor_resolution() {
     }
 }
 
-// Hàm lấy chuỗi trạng thái từ tegrastats để hiển thị trên Dashboard Web
+// Hàm đọc dữ liệu tegrastats từ file tạm do script giám sát tạo ra mỗi 2 giây một lần
 std::string get_tegrastats_string() {
-    char buffer[512]; // buffer tạm để đọc output của tegrastats
-    std::string result = "";
-    
-    // Dùng head -n 1 để lấy đúng 1 dòng rồi ngắt!
-    FILE* pipe = popen("tegrastats | head -n 1", "r");
-    if (!pipe) return "Error: Cannot run tegrastats";
-    
-    // Đọc cái chuỗi đầu ra
-    while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
-        result += buffer;
+    std::ifstream file("/tmp/jetson_stats.txt");
+    std::string result;
+    if (file.is_open()) {
+        std::getline(file, result);
+        file.close();
     }
-    pclose(pipe); // Đóng luồng
-    
-    // Nếu rỗng, báo lỗi
-    if (result.empty()) return "Error: tegrastats returned empty";
-    
-    return result; // Chuỗi tegrastats
+    if (result.empty()) return "Waiting for tegrastats data...";
+    return result; 
 }
 
 // Web Server để hiển thị Dashboard trạng thái 
@@ -226,12 +217,12 @@ void start_web_server() {
             <div class="main-container">
                 
                 <div class="box">
-                    <h2><span class="fire">🚀</span> Jetson Remote V2.0 (Beta)</h2>
+                    <h2><span class="fire">&#128640;</span> Jetson Remote V2.0 (Beta)</h2>
                     <p>Status: <span style="color: yellow;">RUNNING</span></p>
                 </div>
                 
                 <div class="box" id="stats-box">
-                    <h3>📊 System Metrics (tegrastats)</h3>
+                    <h3>&#128202; System Metrics (tegrastats)</h3>
                     <div class="stats-text">)";
         
         dynamic_html += raw_stats;
@@ -286,6 +277,8 @@ int main(int argc, char *argv[]) {
     std::cout << "        Bắn tới IP:   " << target_ip << "\n";
     std::cout << "        Bitrate:      " << target_bitrate << " bps\n";
 
+    // Kích hoạt script giám sát tegrastats chạy ngầm, mỗi 1 giây sẽ cập nhật một lần vào file tạm
+    system("sh -c 'while true; do timeout 1 tegrastats | head -n 1 > /tmp/jetson_stats.txt 2>/dev/null; sleep 1; done' &");
     // Kích hoạt Web Server chạy ở một luồng riêng biệt
     std::thread web_thread(start_web_server);
     web_thread.detach();
