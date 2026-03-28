@@ -13,8 +13,6 @@
 #include <arpa/inet.h>
 #include "httplib.h"
 #include <fstream> // Need to get output of tegrastats
-#include <cstdio> // Need for p.open and popen
-#include <memory> // Need for shared_ptr to popen and pclose
 
 // Định nghĩa gói tin siêu nhẹ (16 bytes)
 struct MouseAndKeyboardPacket {
@@ -279,7 +277,7 @@ int main(int argc, char *argv[]) {
     std::cout << "        Bitrate:      " << target_bitrate << " bps\n";
 
     // Kích hoạt script giám sát tegrastats chạy ngầm, mỗi 1 giây sẽ cập nhật một lần vào file tạm
-    system("sh -c 'while true; do timeout 1 tegrastats | head -n 1 > /tmp/jetson_stats.txt 2>/dev/null; sleep 1; done' &");
+    system("sh -c 'tegrastats | while read line; do echo \"$line\" > /tmp/jetson_stats.txt; done' &");
     // Kích hoạt Web Server chạy ở một luồng riêng biệt
     std::thread web_thread(start_web_server);
     web_thread.detach();
