@@ -193,27 +193,6 @@ std::string get_tegrastats_string() {
 void start_web_server() {
     httplib::Server svr;
 
-    // Khung HTML đơn giản để hiển thị trạng thái của hệ thống, có thể tùy chỉnh thêm sau
-    const char* html_content = R"(
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8"> <title>Remote Dashboard</title>
-        <style>
-            body { background-color: #1e1e1e; color: #00ff00; font-family: monospace; text-align: center; margin-top: 50px; }
-            .box { border: 2px solid #00ff00; padding: 20px; display: inline-block; border-radius: 10px; box-shadow: 0 0 15px #00ff00; }
-        </style>
-    </head>
-    <body>
-        <div class="box">
-            <h2>🚀 Jetson Remote V2.0 (Beta)</h2>
-            <p>Status: <span style="color: yellow;">RUNNING</span></p>
-            <p>Web UI is active on port 8080!</p>
-            </div>
-    </body>
-    </html>
-    )";
-
     // Tạo Router: Bất cứ ai truy cập vào IP của Jetson cổng 8080 đều sẽ thấy trang này
     // Router: Bắn HTML mới mỗi lần ai đó F5
     svr.Get("/", [](const httplib::Request &, httplib::Response &res) {
