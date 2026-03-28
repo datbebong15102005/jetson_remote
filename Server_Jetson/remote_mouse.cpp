@@ -173,9 +173,8 @@ std::string get_tegrastats_string() {
     char buffer[512]; // buffer tạm để đọc output của tegrastats
     std::string result = "";
     
-    // Gọi lệnh Linux (--oneshot để nó trả về 1 dòng rồi tắt luôn)
-    // pclose_wrapper là để tự động pclose file stream khi shared_ptr bị hủy
-    FILE* pipe = popen("tegrastats --oneshot", "r");
+    // Dùng head -n 1 để lấy đúng 1 dòng rồi ngắt!
+    FILE* pipe = popen("tegrastats | head -n 1", "r");
     if (!pipe) return "Error: Cannot run tegrastats";
     
     // Đọc cái chuỗi đầu ra
@@ -199,7 +198,7 @@ void start_web_server() {
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Remote Dashboard</title>
+        <meta charset="UTF-8"> <title>Remote Dashboard</title>
         <style>
             body { background-color: #1e1e1e; color: #00ff00; font-family: monospace; text-align: center; margin-top: 50px; }
             .box { border: 2px solid #00ff00; padding: 20px; display: inline-block; border-radius: 10px; box-shadow: 0 0 15px #00ff00; }
