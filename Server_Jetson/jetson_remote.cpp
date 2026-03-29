@@ -140,7 +140,10 @@ namespace JetsonRemote {
             std::this_thread::sleep_for(std::chrono::seconds(2)); 
         }
     }
-
+    
+    std::string latest_tegrastats = "Waiting for data...";
+    std::mutex stats_mtx;
+    
     // Luồng công nhân chuyên đọc tegrastats trực tiếp từ Kernel
     void tegrastats_worker() {
         // Dùng stdbuf để chống kẹt ống nước (pipe buffer)
