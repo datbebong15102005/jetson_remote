@@ -134,13 +134,13 @@ function parseTegrastats(raw) {
         powerChart.update(); // Bắt đầu vẽ
 
         // Hardware Accelerators (Tàng hình khi Idle)
-        const nvenc = raw.match(/NVENC (\d+)%/);
-        const nvdec = raw.match(/NVDEC (\d+)%/);
-        const nvdla = raw.match(/NVDLA\d? (\d+)%/); 
+        const nvenc = raw.match(/NVENC (\S+)/); // \S+ là bắt mọi ký tự cho đến khi gặp dấu cách
+        const nvdec = raw.match(/NVDEC (\S+)/);
+        const nvdla = raw.match(/NVDLA\d? (\S+)/);
         
-        document.getElementById('nvenc-val').innerText = nvenc ? `${nvenc[1]}%` : "0% (Idle/Off)";
-        document.getElementById('nvdec-val').innerText = nvdec ? `${nvdec[1]}%` : "0% (Idle/Off)";
-        document.getElementById('nvdla-val').innerText = nvdla ? `${nvdla[1]}%` : "0% (Idle/Off)";
+        document.getElementById('nvenc-val').innerText = nvenc ? (nvenc[1].includes('%') ? nvenc[1] : `${nvenc[1]} MHz`) : "0% (Idle/Off)";
+        document.getElementById('nvdec-val').innerText = nvdec ? (nvdec[1].includes('%') ? nvdec[1] : `${nvdec[1]} MHz`) : "0% (Idle/Off)";
+        document.getElementById('nvdla-val').innerText = nvdla ? (nvdla[1].includes('%') ? nvdla[1] : `${nvdla[1]} MHz`) : "0% (Idle/Off)";
 
     } catch (e) {
         console.error("Lỗi parse tegrastats: ", e);

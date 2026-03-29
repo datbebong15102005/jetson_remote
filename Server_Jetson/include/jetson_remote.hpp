@@ -31,6 +31,8 @@ namespace JetsonRemote {
     extern std::string target_display;
     extern std::string target_ip;
     extern std::string target_bitrate;
+    extern std::string latest_tegrastats;
+    extern std::mutex stats_mtx;
 
     // Khai báo các hàm sẽ dùng
     void init_virtual_mouse(int width, int height);
@@ -40,5 +42,6 @@ namespace JetsonRemote {
     void monitor_resolution();
     std::string get_tegrastats_string();
     void start_web_server();
+    void tegrastats_worker();
 }
 #endif // JETSON_REMOTE_HPP

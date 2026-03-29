@@ -141,29 +141,36 @@ namespace JetsonRemote {
         }
     }
 
-    // Hàm đọc dữ liệu tegrastats từ file tạm do script giám sát tạo ra mỗi 2 giây một lần
-    std::string get_tegrastats_string() {
-        std::ifstream file("/tmp/jetson_stats.txt");
-        std::string result;
-        if (file.is_open()) {
-            std::getline(file, result);
-            file.close();
+    // Luồng công nhân chuyên đọc tegrastats trực tiếp từ Kernel
+    void tegrastats_worker() {
+        // Dùng stdbuf để chống kẹt ống nước (pipe buffer)
+        FILE* pipe = popen("stdbuf -oL tegrastats", "r");
+        if (!pipe) return;
+        char buffer[512];
+        while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+            std::lock_guard<std::mutex> lock(stats_mtx);
+            latest_tegrastats = buffer; // Ghi thẳng vào RAM
         }
-        if (result.empty()) return "Waiting for tegrastats data...";
-        return result; 
+        pclose(pipe);
+    }
+
+    // Backend Web gọi hàm để lấy string từ RAM
+    std::string get_tegrastats_string() {
+        std::lock_guard<std::mutex> lock(stats_mtx);
+        return latest_tegrastats;
     }
 
     // Web Server để hiển thị Dashboard trạng thái 
     void start_web_server() {
         httplib::Server svr;
 
-        // 1. Trỏ thư mục gốc vào folder "web". Bất kỳ ai truy cập IP:8080 đều sẽ tự load file index.html trong này!
+        // Trỏ thư mục gốc vào folder "web". Bất kỳ ai truy cập IP:8080 đều sẽ tự load file index.html trong này!
         auto ret = svr.set_mount_point("/", "./web");
         if (!ret) {
             std::cout << "[!] Lỗi: Không tìm thấy thư mục ./web! Giao diện sẽ không hiển thị được.\n";
         }
 
-        // 2. Tạo Endpoint API trả về dữ liệu Tegrastats (Chuẩn JSON cho Javascript nó đọc)
+        // Tạo Endpoint API trả về dữ liệu Tegrastats ở dạng JSON
         svr.Get("/api/stats", [](const httplib::Request &, httplib::Response &res) {
             std::string raw_stats = get_tegrastats_string();
             

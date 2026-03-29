@@ -175,11 +175,13 @@ body {
 }
 
 .chart-container {
+    position: relative;
     background: #161625;
     border: 1px solid #333;
     border-radius: 8px;
     padding: 10px;
     height: 250px; /* Chiều cao cố định cho đồ thị không bị nhảy */
+    width: 100%;
 }
 
 /* Bảng thông số phần cứng */
