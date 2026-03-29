@@ -206,3 +206,18 @@ body {
     color: #00ff00;
 }
 .hw-table th { color: #b0b0d0; }
+
+/* For mobile devices */
+@media (max-width: 768px) {
+    .monitor-grid {
+        grid-template-columns: 1fr; /* Ép về 1 cột duy nhất */
+    }
+    
+    .hw-box {
+        grid-column: span 1; /* Bảng phần cứng cũng co lại 1 cột */
+    }
+
+    .chart-container {
+        height: 280px; /* Kéo dài đồ thị ra thêm 1 tí cho dễ nhìn */
+    }
+}

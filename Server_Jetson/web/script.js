@@ -8,14 +8,29 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Hàm tạo đồ thị Base
     function createChart(ctxId, title, yMax, datasets) {
+        let yAxis = { min: 0 };
+        if (yMax !== null) yAxis.max = yMax;
+
         return new Chart(document.getElementById(ctxId), {
             type: 'line',
             data: { labels: Array(maxPoints).fill(''), datasets: datasets },
             options: {
-                responsive: true, maintainAspectRatio: false,
-                animation: false, // Tắt animation để vẽ real-time không bị giật
-                plugins: { title: { display: true, text: title, color: '#fff' } },
-                scales: { y: { min: 0, max: yMax } }
+                responsive: true, 
+                maintainAspectRatio: false,
+                animation: false,
+                plugins: { 
+                    title: { display: true, text: title, color: '#fff' },
+                    legend: {
+                        labels: {
+                            color: '#b0b0d0',
+                            usePointStyle: true, // Kích hoạt style tùy chỉnh
+                            pointStyle: 'line',  // Chọn style
+                            borderWidth: 2,      // Độ dày của đường chú thích
+                            font: { size: 10 }   // Cỡ chữ
+                        }
+                    }
+                },
+                scales: { y: yAxis } 
             }
         });
     }
