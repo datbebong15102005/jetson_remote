@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     std::cout << "[*] Mouse Server đang chờ lệnh cấu hình...\n";
 
     // Gọi hàm khởi động GStreamer ngay lúc mới mở tool
-    JetsonRemote::restart_gstreamer();
+    // JetsonRemote::restart_gstreamer();
 
     // Bật Camera giám sát màn hình X11 chạy ngầm
     std::thread monitor_thread(JetsonRemote::monitor_resolution);
@@ -68,21 +68,21 @@ int main(int argc, char *argv[]) {
             //std::cout << "[Nhận] x: " << packet.x << " | y: " << packet.y 
             //          << " | click: " << packet.click << " | scroll: " << packet.scroll << "\n";
 
-            // Dịch IP của Laptop từ mã nhị phân sang chuỗi (VD: "100.105.184.63")
+            // Dịch IP của Laptop từ mã nhị phân sang chuỗi
             std::string sender_ip = inet_ntoa(client_addr.sin_addr);
+            bool is_streaming = false; // Cắm cờ trạng thái
 
             // Kiểm tra lệnh từ Laptop
             if (packet.click == 999) {
-                // Tự động chuyển hướng Video nếu IP Laptop thay đổi
-                if (JetsonRemote::target_ip != sender_ip) {
-                    std::cout << "\n[!] Phát hiện Laptop gọi từ IP mới: " << sender_ip << "\n";
-                    std::cout << "[*] Đang chuyển hướng GStreamer sang mục tiêu mới...\n";
-                    JetsonRemote::target_ip = sender_ip; // Cập nhật IP
-                    JetsonRemote::restart_gstreamer(); // Chạy lại GStreamer
+                // Nếu chưa stream hoặc IP laptop bị thay đổi thì mới bật/reset GStreamer
+                if (!is_streaming || JetsonRemote::target_ip != sender_ip) {
+                    std::cout << "\n[!] Laptop (Client) " << sender_ip << " đã gọi cửa!\n";
+                    std::cout << "[*] Đang khởi động động cơ NVENC và truyền Video...\n";
+                    
+                    JetsonRemote::target_ip = sender_ip; 
+                    JetsonRemote::restart_gstreamer(); 
+                    is_streaming = true; // Đánh dấu là đã cày
                 }
-                JetsonRemote::init_virtual_mouse(packet.x, packet.y);
-                continue; // Xử lý xong lệnh cấu hình thì bỏ qua, chờ data mới
-            }
 
             if (packet.click == 888) {
                 std::cout << "\n[!] Nhận được deadlock signal! \n";
