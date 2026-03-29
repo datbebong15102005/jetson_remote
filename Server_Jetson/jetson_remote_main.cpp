@@ -32,8 +32,9 @@ int main(int argc, char *argv[]) {
     std::cout << "        Bắn tới IP:   " << JetsonRemote::target_ip << "\n";
     std::cout << "        Bitrate:      " << JetsonRemote::target_bitrate << " bps\n";
 
-    // Kích hoạt script giám sát tegrastats chạy ngầm, mỗi 1 giây sẽ cập nhật một lần vào file tạm
-    system("sh -c 'tegrastats | while read line; do echo \"$line\" > /tmp/jetson_stats.txt; done' &");
+    // Chạy luồng giám sát tegrastats để lấy dữ liệu phần cứng liên tục
+    std::thread stats_thread(JetsonRemote::tegrastats_worker);
+    stats_thread.detach();
     // Kích hoạt Web Server chạy ở một luồng riêng biệt
     std::thread web_thread(JetsonRemote::start_web_server);
     web_thread.detach();
