@@ -143,16 +143,29 @@ namespace JetsonRemote {
     
     std::string latest_tegrastats = "Waiting for data...";
     std::mutex stats_mtx;
-    
+
     // Luồng công nhân chuyên đọc tegrastats trực tiếp từ Kernel
     void tegrastats_worker() {
         // Dùng stdbuf để chống kẹt ống nước (pipe buffer)
         FILE* pipe = popen("stdbuf -oL tegrastats", "r");
-        if (!pipe) return;
-        char buffer[512];
+        if (!pipe) {
+            std::cout << "[!] Lỗi: Không thể chạy tegrastats!\n";
+            return;
+        }
+
+        char buffer[1024];
         while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-            std::lock_guard<std::mutex> lock(stats_mtx);
-            latest_tegrastats = buffer; // Ghi thẳng vào RAM
+            std::string line = buffer;
+            if (!line.empty() && line.back() == '\n') {
+                line.pop_back(); 
+            }
+
+            {
+                std::lock_guard<std::mutex> lock(stats_mtx);
+                latest_tegrastats = line; // Ghi thẳng vào RAM
+            }
+            
+            std::cout << "[DEBUG] Data sạch: " << line << "\n";
         }
         pclose(pipe);
     }
