@@ -56,11 +56,25 @@ function updateChart(chart, newDataArray) {
 // Hàm bóc tách tegrastats (Hỗ trợ tất cả các dòng Jetson)
 function parseTegrastats(raw) {
     try {
-        // RAM & SWAP
+        // 1. RAM & SWAP
         const ramMatch = raw.match(/RAM (\d+)\/(\d+)MB/);
         const swapMatch = raw.match(/SWAP (\d+)\/(\d+)MB/);
         if (ramMatch && swapMatch) {
-            updateChart(ramChart, [parseInt(ramMatch[1]), parseInt(swapMatch[1])]);
+            let ramCur = parseInt(ramMatch[1]);
+            let ramMax = parseInt(ramMatch[2]); // Bắt mốc Max RAM
+            let swapCur = parseInt(swapMatch[1]);
+            let swapMax = parseInt(swapMatch[2]); // Bắt mốc Max SWAP
+
+            // Lấy đỉnh cao nhất giữa RAM và SWAP làm đỉnh đồ thị
+            let absoluteMax = Math.max(ramMax, swapMax);
+            
+            // Ép Chart.js cập nhật lại cái đỉnh trục Y
+            if (ramChart.options.scales.y.max !== absoluteMax) {
+                ramChart.options.scales.y.max = absoluteMax;
+            }
+
+            // Bơm số liệu hiện tại vào vẽ
+            updateChart(ramChart, [ramCur, swapCur]);
         }
 
         // CPU Cores

@@ -120,6 +120,13 @@
             element.classList.add('active');
 
             closeSidebar();
+
+            // Khi mở tab Monitor, giả vờ như màn hình vừa bị đổi kích thước để  Chart.js tự động giãn nở ra!
+            if (tabId === 'monitor') {
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 50); // Chờ 50ms cho CSS nó phình ra xong mới gọi
+            }
         }
     </script>
 </body>
