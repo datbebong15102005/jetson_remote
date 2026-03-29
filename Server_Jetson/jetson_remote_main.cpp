@@ -83,6 +83,7 @@ int main(int argc, char *argv[]) {
                     JetsonRemote::restart_gstreamer(); 
                     is_streaming = true; // Đánh dấu là đã cày
                 }
+            }
 
             if (packet.click == 888) {
                 std::cout << "\n[!] Nhận được deadlock signal! \n";
