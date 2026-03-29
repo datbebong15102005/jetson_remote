@@ -165,7 +165,7 @@ namespace JetsonRemote {
                 latest_tegrastats = line; // Ghi thẳng vào RAM
             }
 
-            std::cout << "[DEBUG] Data sạch: " << line << "\n";
+            // std::cout << "[DEBUG] Data sạch: " << line << "\n";
         }
         pclose(pipe);
     }
