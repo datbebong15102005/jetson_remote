@@ -8,15 +8,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-
+    <div id="overlay" class="overlay"></div>
     <div class="top-bar">
         <button id="menu-toggle"><i class="fas fa-bars"></i></button>
         <span class="top-title">Jetson Remote Dashboard</span>
     </div>
 
     <div id="sidebar" class="sidebar">
-        <div class="sidebar-header">
+        <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center;">
             <h3><i class="fas fa-rocket"></i> Jetson Remote</h3>
+            <button id="close-btn" class="close-btn"><i class="fas fa-times"></i></button>
         </div>
         <ul class="nav-links">
             <li class="active" onclick="openTab('home', this)"><i class="fas fa-home"></i> Home</li>
@@ -32,10 +33,10 @@
         <div id="home" class="tab-content active">
             <div class="box">
                 <h2>&#127968; Tổng quan hệ thống (Home)</h2>
-                <p>Khung sườn V2.0 Beta đang được xây dựng... Cứ từ từ mà tiến!</p>
+                <p>Khung sườn V2.0 Beta đang được xây dựng... Chờ mòn răng đi!</p>
             </div>
         </div>
-
+        
         <div id="monitor" class="tab-content">
             <div class="box">
                 <h2>&#128202; System Monitor</h2>
@@ -69,31 +70,39 @@
     <script>
         const menuToggle = document.getElementById('menu-toggle');
         const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const closeBtn = document.getElementById('close-btn');
 
-        // Bấm nút 3 gạch thì mở/đóng Sidebar
+        // Hàm Tắt Sidebar
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+
+        // Bấm nút 3 gạch -> Mở Sidebar + Hiện màng đen
         menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
+            sidebar.classList.add('open');
+            overlay.classList.add('show');
         });
+
+        // Bấm nút X hoặc bấm ra ngoài màng đen -> Đóng Sidebar
+        closeBtn.addEventListener('click', closeSidebar);
+        overlay.addEventListener('click', closeSidebar);
 
         // Hàm chuyển Tab
         function openTab(tabId, element) {
-            // 1. Giấu tất cả các tab đi
             const tabs = document.getElementsByClassName('tab-content');
             for (let i = 0; i < tabs.length; i++) {
                 tabs[i].classList.remove('active');
             }
-            // 2. Bỏ sáng (highlight) ở tất cả các nút trên Sidebar
+            
             const navs = document.querySelectorAll('.nav-links li');
             navs.forEach(nav => nav.classList.remove('active'));
 
-            // 3. Hiện Tab được gọi và bôi sáng nút vừa bấm
             document.getElementById(tabId).classList.add('active');
             element.classList.add('active');
 
-            // 4. Nếu đang dùng điện thoại hoặc màn nhỏ, chọn Tab xong thì tự giấu Sidebar đi cho gọn
-            if (window.innerWidth < 768) {
-                sidebar.classList.remove('open');
-            }
+            closeSidebar();
         }
     </script>
 </body>
