@@ -156,7 +156,7 @@ namespace JetsonRemote {
         char buffer[1024];
         while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
             std::string line = buffer;
-            if (!line.empty() && line.back() == '\n') {
+            if (!line.empty() && (line.back() == '\n' || line.back() == '\r')) {
                 line.pop_back(); 
             }
 
@@ -164,7 +164,7 @@ namespace JetsonRemote {
                 std::lock_guard<std::mutex> lock(stats_mtx);
                 latest_tegrastats = line; // Ghi thẳng vào RAM
             }
-            
+
             std::cout << "[DEBUG] Data sạch: " << line << "\n";
         }
         pclose(pipe);
