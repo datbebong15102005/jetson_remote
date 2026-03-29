@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jetson Remote V2.0</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="top-bar">
+        <button id="menu-toggle"><i class="fas fa-bars"></i></button>
+        <span class="top-title">Jetson Remote Dashboard</span>
+    </div>
+
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-rocket"></i> Jetson Remote</h3>
+        </div>
+        <ul class="nav-links">
+            <li class="active" onclick="openTab('home', this)"><i class="fas fa-home"></i> Home</li>
+            <li onclick="openTab('monitor', this)"><i class="fas fa-chart-line"></i> Monitor</li>
+            <li onclick="openTab('pin', this)"><i class="fas fa-key"></i> PIN</li>
+            <li onclick="openTab('configs', this)"><i class="fas fa-cog"></i> Configs</li>
+            <li onclick="openTab('about', this)"><i class="fas fa-info-circle"></i> About</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="home" class="tab-content active">
+            <div class="box">
+                <h2>&#127968; Tổng quan hệ thống (Home)</h2>
+                <p>Khung sườn V2.0 Beta đang được xây dựng... Cứ từ từ mà tiến!</p>
+            </div>
+        </div>
+
+        <div id="monitor" class="tab-content">
+            <div class="box">
+                <h2>&#128202; System Monitor</h2>
+                <p>Chỗ này sau sẽ nhét Chart.js vào vẽ đồ thị tegrastats nhảy múa.</p>
+            </div>
+        </div>
+
+        <div id="pin" class="tab-content">
+            <div class="box">
+                <h2>&#128274; Quản lý mã PIN</h2>
+                <p>Giao diện cấp quyền và bảo mật cho Client.</p>
+            </div>
+        </div>
+
+        <div id="configs" class="tab-content">
+            <div class="box">
+                <h2>&#9881; Cấu hình GStreamer</h2>
+                <p>Các thanh trượt chỉnh Bitrate, Resolution sẽ nằm ở đây.</p>
+            </div>
+        </div>
+
+        <div id="about" class="tab-content">
+            <div class="box" style="border-color: red;">
+                <h2 style="color: red;">&#8505; Red Zone & About</h2>
+                <p>Chứa nút Restart, Reboot Jetson. <br><br><b>Developed by Nguyễn Trọng Đạt.</b></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+
+        // Bấm nút 3 gạch thì mở/đóng Sidebar
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+
+        // Hàm chuyển Tab
+        function openTab(tabId, element) {
+            // 1. Giấu tất cả các tab đi
+            const tabs = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            // 2. Bỏ sáng (highlight) ở tất cả các nút trên Sidebar
+            const navs = document.querySelectorAll('.nav-links li');
+            navs.forEach(nav => nav.classList.remove('active'));
+
+            // 3. Hiện Tab được gọi và bôi sáng nút vừa bấm
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+
+            // 4. Nếu đang dùng điện thoại hoặc màn nhỏ, chọn Tab xong thì tự giấu Sidebar đi cho gọn
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('open');
+            }
+        }
+    </script>
+</body>
+</html>
