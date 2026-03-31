@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
             bool is_streaming = false; // Cắm cờ trạng thái
 
             // Kiểm tra lệnh từ Laptop
-            if (packet.click == 999) {
+            if (packet.signal == 999) {
             // Chỉ bật GStreamer nếu chưa bật HOẶC đổi IP
                 if (!JetsonRemote::is_streaming || JetsonRemote::target_ip != sender_ip) {
                     std::cout << "\n[!] Laptop (Client) " << sender_ip << " đã yêu cầu Remote!\n";
@@ -106,7 +106,20 @@ int main(int argc, char *argv[]) {
                 continue;
             }
 
-            if (packet.click == 888) {
+            // Lệnh ngắt kết nối từ Laptop
+            if (packet.signal == 998) {
+                std::cout << "\n[!] Laptop (Client) " << sender_ip << " đã ngắt kết nối!\n";
+                
+                if (JetsonRemote::is_streaming) {
+                    JetsonRemote::stop_gstreamer(); 
+                }
+                
+                current_w = 0; 
+                current_h = 0; 
+                continue; 
+            }
+
+            if (packet.signal == 888) {
                 std::cout << "\n[!] Nhận được deadlock signal! \n";
                 JetsonRemote::restart_gstreamer(); // Gọi quản gia ra dọn dẹp và bật lại
                 continue;

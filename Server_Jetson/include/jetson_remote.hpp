@@ -20,8 +20,9 @@
 
 // Định nghĩa gói tin siêu nhẹ (16 bytes)
 struct MouseAndKeyboardPacket {
-    int x, y, click, scroll;
-    int is_keyboard, keycode, keystate;
+    int x, y, click, scroll; // Dùng cho chức năng của chuột
+    int signal; // Dùng để gửi lệnh đặc biệt như "bật stream" hoặc "tắt stream"
+    int is_keyboard, keycode, keystate; // Dùng cho chức năng của bàn phím
 };
 
 namespace JetsonRemote {
