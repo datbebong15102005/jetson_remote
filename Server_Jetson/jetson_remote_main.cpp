@@ -60,13 +60,27 @@ int main(int argc, char *argv[]) {
     // 
     struct sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
+    
+    // Biến quản lý thời gian kết nối
+    auto last_packet_time = std::chrono::steady_clock::now();
+    int current_w = 0, current_h = 0; // Để tránh tạo lại chuột vô tội vạ
 
     while (true) {
+        // Kiểm tra Timeout: Nếu đang stream mà quá 5 giây chưa nhận được gì thì tắt GStreamer!
+        auto now = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - last_packet_time).count();
+        
+        if (JetsonRemote::is_streaming && duration > 5) {
+            JetsonRemote::stop_gstreamer();
+        }
 
         if (recvfrom(sock, &packet, sizeof(MouseAndKeyboardPacket), 0, (struct sockaddr *)&client_addr, &client_len) > 0) {
             //Debug gói tin nhận được
             //std::cout << "[Nhận] x: " << packet.x << " | y: " << packet.y 
             //          << " | click: " << packet.click << " | scroll: " << packet.scroll << "\n";
+
+            // Cập nhật lại thời gian nhận gói tin mới nhất
+            last_packet_time = std::chrono::steady_clock::now();
 
             // Dịch IP của Laptop từ mã nhị phân sang chuỗi
             std::string sender_ip = inet_ntoa(client_addr.sin_addr);
@@ -74,15 +88,22 @@ int main(int argc, char *argv[]) {
 
             // Kiểm tra lệnh từ Laptop
             if (packet.click == 999) {
-                // Nếu chưa stream hoặc IP laptop bị thay đổi thì mới bật/reset GStreamer
-                if (!is_streaming || JetsonRemote::target_ip != sender_ip) {
-                    std::cout << "\n[!] Laptop (Client) " << sender_ip << " đã gọi cửa!\n";
-                    std::cout << "[*] Đang khởi động động cơ NVENC và truyền Video...\n";
-                    
+            // Chỉ bật GStreamer nếu chưa bật HOẶC đổi IP
+                if (!JetsonRemote::is_streaming || JetsonRemote::target_ip != sender_ip) {
+                    std::cout << "\n[!] Laptop (Client) " << sender_ip << " đã yêu cầu Remote!\n";
                     JetsonRemote::target_ip = sender_ip; 
                     JetsonRemote::restart_gstreamer(); 
-                    is_streaming = true; // Đánh dấu là đã cày
+                    JetsonRemote::is_streaming = true;
                 }
+                
+                // Chỉ tạo lại chuột nếu độ phân giải thay đổi
+                if (packet.x != current_w || packet.y != current_h) {
+                    std::cout << "[*] Cấu hình lại chuột ảo: " << packet.x << "x" << packet.y << "\n";
+                    JetsonRemote::init_virtual_mouse(packet.x, packet.y);
+                    current_w = packet.x;
+                    current_h = packet.y;
+                }
+                continue;
             }
 
             if (packet.click == 888) {

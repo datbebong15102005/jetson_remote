@@ -6,6 +6,7 @@ namespace JetsonRemote {
     std::string target_display = ":0"; // Biến toàn cục giữ tên màn hình
     std::string target_ip = "127.0.0.1"; 
     std::string target_bitrate = "8000000";
+    bool is_streaming = false; // Biến cờ để đánh dấu trạng thái streaming
 
     void init_virtual_mouse(int width, int height) {
         std::lock_guard<std::mutex> lock(mouse_mtx);
@@ -58,7 +59,7 @@ namespace JetsonRemote {
         }
         
         // Yêu cầu GStreamer tự sát nhẹ nhàng bằng kill -15 (SIGTERM)
-        system("if [ -f /tmp/wsr_remote_gst.pid ]; then kill -15 $(cat /tmp/wsr_remote_gst.pid) 2>/dev/null; rm /tmp/wsr_remote_gst.pid; fi");
+        system("if [ -f /tmp/jetson_remote_gst.pid ]; then kill -15 $(cat /tmp/jetson_remote_gst.pid) 2>/dev/null; rm /tmp/jetson_remote_gst.pid; fi");
         
         std::cout << "[+] Shutting down...\n";
         system("pkill -f 'tegrastats'"); // Dừng luôn cả script giám sát tegrastats
@@ -69,7 +70,7 @@ namespace JetsonRemote {
         std::cout << "\n[*] Đang kiểm tra và dọn dẹp luồng GStreamer cũ...\n";
         
         // Chỉ Kill đúng cái tiến trình có mã PID lưu trong file tạm (nếu file tồn tại)
-        system("if [ -f /tmp/wsr_remote_gst.pid ]; then kill -15 $(cat /tmp/wsr_remote_gst.pid) 2>/dev/null; rm /tmp/wsr_remote_gst.pid; fi"); 
+        system("if [ -f /tmp/jetson_remote_gst.pid ]; then kill -15 $(cat /tmp/jetson_remote_gst.pid) 2>/dev/null; rm /tmp/jetson_remote_gst.pid; fi"); 
         
         sleep(2); 
         
@@ -79,7 +80,7 @@ namespace JetsonRemote {
         std::string gst_cmd = "nohup gst-launch-1.0 ximagesrc display-name=" + target_display + 
                             " use-damage=0 ! video/x-raw,framerate=60/1 ! nvvidconv ! 'video/x-raw(memory:NVMM),format=NV12' ! nvv4l2h264enc insert-sps-pps=true maxperf-enable=1 preset-level=1 control-rate=1 bitrate=" + target_bitrate + 
                             " profile=4 ! rtph264pay mtu=1200 config-interval=1 ! udpsink host=" + target_ip + 
-                            " port=5000 buffer-size=2147483647 > /dev/null 2>&1 & echo $! > /tmp/wsr_remote_gst.pid";
+                            " port=5000 buffer-size=2147483647 > /dev/null 2>&1 & echo $! > /tmp/jetson_remote_gst.pid";
 
         system(gst_cmd.c_str());
         std::cout << "[+] Đã khởi động GStreamer! Đang gửi " << target_bitrate << " bps tới IP " << target_ip << "...\n";
@@ -199,5 +200,10 @@ namespace JetsonRemote {
 
         std::cout << "\n[+] Web Backend API đang chạy tại cổng 8080...\n";
         svr.listen("0.0.0.0", 8080);
+    }
+    void stop_gstreamer() {
+        std::cout << "[!] Phát hiện mất kết nối. Đang tắt GStreamer để tiết kiệm điện...\n";
+        system("if [ -f /tmp/jetson_remote_gst.pid ]; then kill -15 $(cat /tmp/jetson_remote_gst.pid) 2>/dev/null; rm /tmp/jetson_remote_gst.pid; fi");
+        is_streaming = false;
     }
 }
