@@ -9,3 +9,4 @@ wsr_mouse
 
 # Bỏ qua file log rác
 *.log
+.vscode
