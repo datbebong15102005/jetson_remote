@@ -94,9 +94,13 @@ Window {
                     // Gửi IP xuống C++
                     backend.setTargetIp(ipInput.text)
 
+                    // Lấy kích thước hiện tại (Nếu chưa có thì mặc định 1280x720)
+                    let w = videoReceiver.hostWidth > 0 ? videoReceiver.hostWidth : 1280
+                    let h = videoReceiver.hostHeight > 0 ? videoReceiver.hostHeight : 720
+
                     // Gọi đánh thức
                     console.log("Đang gọi Jetson ở IP: " + ipInput.text)
-                    backend.sendInitPacket(videoReceiver.hostWidth, videoReceiver.hostHeight)
+                    backend.sendSignal(999, w, h)
 
                     // Đóng Popup
                     ipPopup.close()
@@ -134,7 +138,7 @@ Window {
             function onResolutionChanged() {
                 console.log("Phát hiện Jetson đổi phân giải: " + videoReceiver.hostWidth + "x" + videoReceiver.hostHeight)
                 // Lập tức nã gói tin cấu hình sang Jetson
-                backend.sendInitPacket(videoReceiver.hostWidth, videoReceiver.hostHeight)
+                backend.sendSignal(999, videoReceiver.hostWidth, videoReceiver.hostHeight)
             }
         }
     }
@@ -148,7 +152,7 @@ Window {
         onTriggered: {
             console.log("[!] Deadlock Detected! GStreamer đã bị lỗi. Gửi lệnh 888 để Reset...")
             // Dùng số 888 làm Magic Number ra lệnh Kill/Restart
-            backend.sendMouseData(0, 0, 888, 0)
+            backend.sendSignal(888)
         }
     }
 

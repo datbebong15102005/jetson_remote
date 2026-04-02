@@ -8,6 +8,7 @@ struct MouseAndKeyboardPacket {
     int y;
     int click;
     int scroll;
+    int signal;
 
     // For keyboard
     int is_keyboard; // 1: Lệnh phím, 0: Lệnh chuột
@@ -37,7 +38,24 @@ void UdpSender::sendMouseData(int x, int y, int click, int scroll)
     packet.y = y;
     packet.click = click;
     packet.scroll = scroll;
+    packet.signal = 0;
     packet.is_keyboard = 0; // Mode chuột
+
+    // Đóng gói 16 bytes và gửi sang Jetson bằng m_targetIp
+    m_socket->writeDatagram(reinterpret_cast<const char*>(&packet),
+                            sizeof(MouseAndKeyboardPacket),
+                            QHostAddress(m_targetIp),
+                            m_targetPort);
+}
+
+// Hàm signal
+void UdpSender::sendSignal(int signal, int width, int height)
+{
+    MouseAndKeyboardPacket packet;
+    memset(&packet, 0, sizeof(packet)); // Dọn rác trong RAM
+    packet.signal = signal;
+    packet.x = width;
+    packet.y = height;
 
     // Đóng gói 16 bytes và gửi sang Jetson bằng m_targetIp
     m_socket->writeDatagram(reinterpret_cast<const char*>(&packet),
@@ -52,23 +70,9 @@ void UdpSender::sendKeyData(int keycode, int keystate) {
     memset(&packet, 0, sizeof(packet)); // Dọn sạch rác trong bộ nhớ
 
     packet.is_keyboard = 1; // Bật cờ khai báo "Tao là bàn phím"
+    packet.signal = 0;
     packet.keycode = keycode;
     packet.keystate = keystate;
-
-    m_socket->writeDatagram(reinterpret_cast<const char*>(&packet),
-                            sizeof(MouseAndKeyboardPacket),
-                            QHostAddress(m_targetIp),
-                            m_targetPort);
-}
-
-// Hàm đánh thức Jetson (999)
-void UdpSender::sendInitPacket(int width, int height)
-{
-    MouseAndKeyboardPacket packet;
-    packet.x = width;
-    packet.y = height;
-    packet.click = 999;
-    packet.scroll = 0;
 
     m_socket->writeDatagram(reinterpret_cast<const char*>(&packet),
                             sizeof(MouseAndKeyboardPacket),

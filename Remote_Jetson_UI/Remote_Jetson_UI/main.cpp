@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "videoreceiver.h"
 
-// Lớp này dùng để tuồn ảnh QImage từ C++ sang cho QML vẽ
+// Lớp này dùng để đưa ảnh QImage từ C++ sang cho QML vẽ
 class LiveImageProvider : public QQuickImageProvider {
 public:
     LiveImageProvider(VideoReceiver *receiver)
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
     // Đăng ký cổng "image://live" cho QML
     engine.addImageProvider(QLatin1String("live"), new LiveImageProvider(&videoReceiver));
 
-    // Dùng appsink hút dữ liệu thô, vứt mọi rắc rối về GPU
+    // Dùng appsink hút dữ liệu thô
     QString pipelineStr = "udpsrc port=5000 buffer-size=2147483647 caps=\"application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264\" ! rtph264depay ! decodebin ! videoconvert ! video/x-raw,format=RGBx ! appsink name=mysink drop=true max-buffers=1 emit-signals=true sync=false";
     GstElement *pipeline = gst_parse_launch(pipelineStr.toStdString().c_str(), nullptr);
     GstElement *sink = gst_bin_get_by_name(GST_BIN(pipeline), "mysink");
@@ -87,9 +87,10 @@ int main(int argc, char *argv[]) {
     }, Qt::QueuedConnection);
     engine.load(url);
 
-    // Bẫy sự kiện: Khi bấm dấu X tắt app, dừng ngay ống hút GStreamer lại!
+    // Bẫy sự kiện: Khi bấm dấu X tắt app, dừng ngay GStreamer
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&]() {
         gst_element_set_state(pipeline, GST_STATE_NULL);
+        udpSender.sendSignal(998, 0, 0); // Gửi lệnh ngắt kết nối về Jetson
     });
 
     return app.exec();

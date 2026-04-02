@@ -13,7 +13,7 @@ public:
 
     Q_INVOKABLE void setTargetIp(const QString &ip);
     Q_INVOKABLE void sendMouseData(int x, int y, int click, int scroll = 0);
-    Q_INVOKABLE void sendInitPacket(int width, int height);
+    Q_INVOKABLE void sendSignal(int signal, int width, int height);
 
     Q_INVOKABLE void sendKeyData(int keycode, int keystate);
 
