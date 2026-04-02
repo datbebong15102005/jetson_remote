@@ -61,6 +61,12 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
     
+    // Cứ 1 giây là hàm recvfrom phải tự động tỉnh dậy nhả luồng 1 lần
+    struct timeval tv;
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+
     // Biến quản lý thời gian kết nối
     auto last_packet_time = std::chrono::steady_clock::now();
     int current_w = 0, current_h = 0; // Để tránh tạo lại chuột vô tội vạ
@@ -77,14 +83,14 @@ int main(int argc, char *argv[]) {
         if (recvfrom(sock, &packet, sizeof(MouseAndKeyboardPacket), 0, (struct sockaddr *)&client_addr, &client_len) > 0) {
             // Debug gói tin nhận được
             std::cout << "[Nhận] x: " << packet.x << " | y: " << packet.y 
-                      << " | click: " << packet.click << " | scroll: " << packet.scroll << " | signal: " << packet.signal << "\n";
+                      << " | click: " << packet.click << " | scroll: " << packet.scroll 
+                      << " | signal: " << packet.signal << "\n";
 
             // Cập nhật lại thời gian nhận gói tin mới nhất
             last_packet_time = std::chrono::steady_clock::now();
 
             // Dịch IP của Laptop từ mã nhị phân sang chuỗi
             std::string sender_ip = inet_ntoa(client_addr.sin_addr);
-            bool is_streaming = false; // Cắm cờ trạng thái
 
             // Kiểm tra lệnh từ Laptop
             if (packet.signal == 999) {
