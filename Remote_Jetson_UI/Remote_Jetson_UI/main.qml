@@ -138,7 +138,7 @@ Window {
             function onResolutionChanged() {
                 console.log("Phát hiện Jetson đổi phân giải: " + videoReceiver.hostWidth + "x" + videoReceiver.hostHeight)
                 // Lập tức nã gói tin cấu hình sang Jetson
-                backend.sendSignal(999)
+                backend.sendSignal(999, videoReceiver.hostWidth, videoReceiver.hostHeight)
             }
         }
     }
