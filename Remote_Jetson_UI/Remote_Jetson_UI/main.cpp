@@ -87,11 +87,5 @@ int main(int argc, char *argv[]) {
     }, Qt::QueuedConnection);
     engine.load(url);
 
-    // Bẫy sự kiện: Khi bấm dấu X tắt app, dừng ngay GStreamer
-    QObject::connect(&app, &QCoreApplication::aboutToQuit, [&]() {
-        gst_element_set_state(pipeline, GST_STATE_NULL);
-        udpSender.sendSignal(998, 0, 0); // Gửi lệnh ngắt kết nối về Jetson
-    });
-
     return app.exec();
 }

@@ -9,3 +9,5 @@ wsr_mouse
 
 # Bỏ qua file log rác
 *.log
+build-Remote_Jetson_UI-Desktop*/
+CMakeLists.txt.user
