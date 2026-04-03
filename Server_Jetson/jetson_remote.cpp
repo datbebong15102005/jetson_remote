@@ -112,10 +112,11 @@ namespace JetsonRemote {
                 char line[256];
                 int w = 0, h = 0;
                 while (fgets(line, sizeof(line), fp)) {
-                    // Dấu * chỉ định độ phân giải ĐANG HOẠT ĐỘNG
-                    if (strchr(line, '*')) { 
-                        // Bóc tách siêu tốc ra 2 biến w và h
-                        if (sscanf(line, " %dx%d", &w, &h) == 2) break; 
+                    // Tìm dòng có chứa "current " để bóc tách độ phân giải hiện tại
+                    char* current_ptr = strstr(line, "current ");
+                    if (current_ptr) { 
+                        // Bóc tách: "current 1280 x 720" thành w=1280, h=720
+                        if (sscanf(current_ptr, "current %d x %d", &w, &h) == 2) break; 
                     }
                 }
                 pclose(fp);

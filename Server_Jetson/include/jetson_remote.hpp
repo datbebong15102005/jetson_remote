@@ -18,7 +18,7 @@
 #include <fstream>
 #include "httplib.h"
 
-// Định nghĩa gói tin siêu nhẹ (16 bytes)
+// Định nghĩa gói tin
 struct MouseAndKeyboardPacket {
     int x, y, click, scroll; // Dùng cho chức năng của chuột
     int signal; // Dùng để gửi lệnh đặc biệt như "bật stream" hoặc "tắt stream"
