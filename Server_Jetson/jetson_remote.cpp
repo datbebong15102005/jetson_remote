@@ -110,7 +110,7 @@ namespace JetsonRemote {
             FILE* fp = popen(xrandr_cmd.c_str(), "r");
             if (fp) {
                 char line[256];
-                int w = 0, h = 0;
+                int w = 1280, h = 720;
                 while (fgets(line, sizeof(line), fp)) {
                     // Tìm dòng có chứa "current " để bóc tách độ phân giải hiện tại
                     char* current_ptr = strstr(line, "current ");
